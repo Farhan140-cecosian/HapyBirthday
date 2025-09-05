@@ -1,2 +1,568 @@
-# HapyBirthday
-Happy birthday brother
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World's First Interactive Birthday Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0a2a5f 0%, #1a1a2e 50%, #16213e 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+            color: white;
+            position: relative;
+        }
+        
+        /* 3D Canvas for ocean experience */
+        #oceanCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* Floating content container with lighting effect */
+        .content-container {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 30, 0.4);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            margin: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .content-container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            z-index: -1;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff6b6b);
+            background-size: 400% 400%;
+            border-radius: 25px;
+            animation: border-glow 8s ease infinite;
+            filter: blur(15px);
+            opacity: 0.7;
+        }
+        
+        @keyframes border-glow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Holographic text effect */
+        .holographic {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff6b6b);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: holographic 8s ease infinite;
+            font-weight: 800;
+        }
+        
+        @keyframes holographic {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 3D photo gallery */
+        .photo-gallery {
+            perspective: 1000px;
+            height: 250px;
+            margin: 2rem auto;
+        }
+        
+        .photo-carousel {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: carousel-rotate 30s infinite linear;
+        }
+        
+        .photo-item {
+            position: absolute;
+            width: 200px;
+            height: 150px;
+            left: calc(50% - 100px);
+            top: calc(50% - 75px);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s, box-shadow 0.5s;
+        }
+        
+        .photo-item:hover {
+            transform: translateZ(50px) scale(1.1);
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2);
+            animation: photo-pulse 1s infinite alternate;
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        @keyframes carousel-rotate {
+            from { transform: rotateY(0); }
+            to { transform: rotateY(360deg); }
+        }
+        
+        @keyframes photo-pulse {
+            from { box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2); }
+            to { box-shadow: 0 15px 35px rgba(255, 215, 0, 0.6); }
+        }
+        
+        /* Interactive cake */
+        .interactive-cake {
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+        
+        .interactive-cake:hover {
+            transform: rotateY(20deg) rotateX(10deg);
+        }
+        
+        .cake-layer {
+            position: absolute;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .layer-1 {
+            width: 200px;
+            height: 60px;
+            bottom: 0;
+            background: linear-gradient(to right, #ff6b6b, #ffa500);
+        }
+        
+        .layer-2 {
+            width: 160px;
+            height: 50px;
+            bottom: 60px;
+            left: 20px;
+            background: linear-gradient(to right, #4ecdc4, #1aae9f);
+        }
+        
+        .layer-3 {
+            width: 120px;
+            height: 40px;
+            bottom: 110px;
+            left: 40px;
+            background: linear-gradient(to right, #45b7d1, #96c93d);
+        }
+        
+        .candle {
+            width: 15px;
+            height: 60px;
+            background: white;
+            border-radius: 5px;
+            position: absolute;
+            bottom: 150px;
+            left: 92.5px;
+            z-index: 10;
+        }
+        
+        .flame {
+            width: 20px;
+            height: 40px;
+            background: linear-gradient(to top, #ff4500, #ffed00);
+            border-radius: 50% 50% 20% 20%;
+            position: absolute;
+            bottom: 210px;
+            left: 90px;
+            animation: flicker 0.8s ease-in-out infinite alternate;
+            box-shadow: 0 0 20px #ff4500, 0 0 40px #ffed00;
+        }
+        
+        /* Particle network */
+        .particle-network {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Fireworks */
+        .firework {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: explode 1.5s ease-out forwards;
+            opacity: 1;
+            z-index: 20;
+        }
+        
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: inherit;
+            border-radius: 50%;
+            animation: sparkBurst 0.5s linear forwards;
+        }
+        
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(3); opacity: 0.8; }
+            100% { transform: scale(0.2); opacity: 0; }
+        }
+        
+        @keyframes sparkBurst {
+            0% { transform: scale(0) translate(-10px, -10px); opacity: 1; }
+            100% { transform: scale(1) translate(20px, 20px); opacity: 0; }
+        }
+        
+        /* Signature style */
+        .signature {
+            font-family: 'Montserrat', cursive;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: right;
+            margin-top: 2rem;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .photo-gallery {
+                height: 200px;
+            }
+            
+            .photo-item {
+                width: 150px;
+                height: 112px;
+                left: calc(50% - 75px);
+                top: calc(50% - 56px);
+            }
+            
+            .interactive-cake {
+                transform: scale(0.8);
+            }
+            
+            .interactive-cake:hover {
+                transform: scale(0.8) rotateY(20deg) rotateX(10deg);
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+    <!-- 3D Ocean Canvas -->
+    <canvas id="oceanCanvas"></canvas>
+    
+    <!-- Particle Network -->
+    <div class="particle-network" id="particleNetwork"></div>
+    
+    <div class="content-container max-w-4xl w-full">
+        <!-- Holographic Title with lighting effect -->
+        <h1 class="text-4xl md:text-5xl font-bold mb-6 text-center holographic">Happy Birthday!</h1>
+        
+        <!-- 3D Poem Text -->
+        <div class="poem mb-8">
+            <p id="poemText" class="text-lg md:text-xl text-center leading-relaxed"></p>
+        </div>
+        
+        <!-- 3D Photo Carousel -->
+        <div class="photo-gallery">
+            <div class="photo-carousel">
+                <div class="photo-item" style="transform: rotateY(0deg) translateZ(250px)">
+                    <img src="https://scontent.fpew1-1.fna.fbcdn.net/v/t39.30808-6/538545234_1508279593875958_5797101125526723153_n.jpg?stp=c0.296.1152.1152a_dst-jpg_s206x206_tt6&_nc_cat=105&ccb=1-7&_nc_sid=714c7a&_nc_eui2=AeGiqiMB0mEJ964IXU8lpntSMNXkn4fJ-Esw1eSfh8n4SzEQh9SdaBYGLb8r7P4dSbMw0jkG5xmhQX8x5SqzmQB9&_nc_ohc=WLTbZpkO2SsQ7kNvwGitfWV&_nc_oc=AdniyJADt2qY9WJiegRom0tkKBE6NMWki5YCuVsrjYdNaw9QrN-131exDvQ7R6xcS7k&_nc_zt=23&_nc_ht=scontent.fpew1-1.fna&_nc_gid=TZin521u4FiesYJF5gWnjA&oh=00_AfYCGRAdDhQ6aJbCd9Q_88Ikg-fuPxbj-JH3_pu4GpHzPg&oe=68C0EEB9" alt="Smiling">
+                </div>
+                <div class="photo-item" style="transform: rotateY(72deg) translateZ(250px)">
+                    <img src="https://scontent.fpew1-1.fna.fbcdn.net/v/t39.30808-6/480644955_1368024907901428_1295658636099352514_n.jpg?stp=c0.527.1399.1399a_dst-jpg_s206x206_tt6&_nc_cat=107&ccb=1-7&_nc_sid=714c7a&_nc_eui2=AeGSBcrxz0zuHojXbSW7QYDOnk5S-3ZY_dCeTlL7dlj90CnIXPk8-YJnlJB-9-3EUIPzNUv4cbfc1-EIBYQqjZrA&_nc_ohc=oQL_n1T4iSAQ7kNvwF2ZLoc&_nc_oc=AdkyzUVodX7FwJ9Jqu77Bi3ZC2Y3x-CLXvcEAFSsL_XTX2wjxFZCB61R0WTpGEd1_LU&_nc_zt=23&_nc_ht=scontent.fpew1-1.fna&_nc_gid=TZin521u4FiesYJF5gWnjA&oh=00_AfawGDHSpUMCzItl_k6nwyobCOBg1_LRA81BCodMCtF7cQ&oe=68C10DC9" alt="Laughing">
+                </div>
+                <div class="photo-item" style="transform: rotateY(144deg) translateZ(250px)">
+                    <img src="https://scontent.fpew1-1.fna.fbcdn.net/v/t1.6435-9/68456627_100798307957434_408478851870490624_n.jpg?stp=dst-jpg_s206x206_tt6&_nc_cat=100&ccb=1-7&_nc_sid=fe5ecc&_nc_eui2=AeGu_cxLivqIFpBC9X4eYK0hi1-jLEHJDjKLX6MsQckOMgRCag3fDkroVmvwuQe2LNnOw5D7T6JUNMyl_uPbDWNh&_nc_ohc=N_kHmMRWspoQ7kNvwHcldz7&_nc_oc=Adk0fjwU0Cgj7oIQ9rxDXpWcGoUzz63iNDuONPrYteV0n8YA2I3ALy-Q8VZEmVcwL_Y&_nc_zt=23&_nc_ht=scontent.fpew1-1.fna&_nc_gid=nAUerMabzmvxd5rAaguSjw&oh=00_AfbRgIYueZrqqtWR76UuHG-254YCZerGHfKchi5z-zJYZw&oe=68E2A70B" alt="Contemplative">
+                </div>
+                <div class="photo-item" style="transform: rotateY(216deg) translateZ(250px)">
+                    <img src="https://scontent.fpew1-1.fna.fbcdn.net/v/t1.6435-9/127704004_411809520189643_4226600803896923204_n.jpg?stp=c0.80.719.719a_dst-jpg_s206x206_tt6&_nc_cat=109&ccb=1-7&_nc_sid=714c7a&_nc_eui2=AeG68sr2OE_P1k-tBc_t_re8sMJ2IHMW0Z6wwnYgcxbRnr6nPNsbVeRXcWX9NMHqa_QZ9_vyneZQ5deDF5v5T8me&_nc_ohc=ZKwewY3YgnwQ7kNvwHof1Lm&_nc_oc=AdmvYS5KJGrLCvZhqJO9h4wztZr02UhtCobwBdQZ8D63ozWEzyGLs2YkJLAFz2bkrGA&_nc_zt=23&_nc_ht=scontent.fpew1-1.fna&_nc_gid=WhWZ3evDv765nNxKZgRiqA&oh=00_Afbtbrs0xWmojWQhS7Y93MF0lhJaBEndLkhi-nKYooSE9w&oe=68E2939C" alt="Celebrating">
+                </div>
+                <div class="photo-item" style="transform: rotateY(288deg) translateZ(250px)">
+                    <img src="https://scontent.fpew1-1.fna.fbcdn.net/v/t39.30808-6/353054179_994370191933570_364318070206760678_n.jpg?stp=dst-jpg_s206x206_tt6&_nc_cat=100&ccb=1-7&_nc_sid=7a06f5&_nc_eui2=AeEFVM7Y6V1JdLNBHpwOjbco-LkjzHjvDRX4uSPMeO8NFcCcnNs0DD7NPl_FZFWuH6qIH4lYlmv3gr6zLXdn6ZXx&_nc_ohc=gk5U_SDKF1YQ7kNvwHr58vz&_nc_oc=AdlJFQJGIxi3PC68sbHVxruTsTW-vQpmdUeJxbFyQi3kP5B90KPlnJn54F8AJRO0s4E&_nc_zt=23&_nc_ht=scontent.fpew1-1.fna&_nc_gid=1xRmPu3FIW9eluJkZjdUwA&oh=00_Afbzwilp1JiVAEm6AJEYB-G0k5kdUqyXD2lZuwlaGoX0Qw&oe=68C102D2" alt="Ocean scene">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Cake -->
+        <div class="interactive-cake" id="interactiveCake">
+            <div class="cake-layer layer-1"></div>
+            <div class="cake-layer layer-2"></div>
+            <div class="cake-layer layer-3"></div>
+            <div class="candle"></div>
+            <div class="flame" id="cakeFlame"></div>
+        </div>
+        
+        <!-- Final Message -->
+        <div class="mt-8 text-center">
+            <p class="text-xl md:text-2xl">Your presence in my life is like the ocean - vast, powerful, and endlessly inspiring.</p>
+            <p class="text-lg mt-4">Wishing you the most incredible birthday yet!</p>
+        </div>
+        
+        <!-- Signature -->
+        <div class="signature">From Farhan Ahmad</div>
+    </div>
+    
+    <!-- Interactive Button -->
+    <button class="mt-8 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-full hover:scale-110 transition-transform shadow-lg z-10" id="wishBtn">
+        
+    </button>
+
+    <!-- Fireworks Container -->
+    <div id="fireworks" class="absolute inset-0 pointer-events-none"></div>
+
+    <script>
+        // Initialize Three.js 3D ocean
+        let scene, camera, renderer;
+        let oceanMesh;
+        
+        function initThreeJS() {
+            // Setup scene
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+            
+            // Setup renderer
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('oceanCanvas'), alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Create ocean geometry
+            const geometry = new THREE.PlaneGeometry(20, 20, 50, 50);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x1a5fb4,
+                wireframe: false,
+                transparent: true,
+                opacity: 0.8,
+                specular: 0xffffff,
+                shininess: 100
+            });
+            
+            oceanMesh = new THREE.Mesh(geometry, material);
+            oceanMesh.rotation.x = -Math.PI / 2;
+            scene.add(oceanMesh);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Start animation
+            animateOcean();
+        }
+        
+        function animateOcean() {
+            requestAnimationFrame(animateOcean);
+            
+            // Animate ocean waves
+            const time = Date.now() * 0.001;
+            const positionAttribute = oceanMesh.geometry.getAttribute('position');
+            const vertex = new THREE.Vector3();
+            
+            for (let i = 0; i < positionAttribute.count; i++) {
+                vertex.fromBufferAttribute(positionAttribute, i);
+                
+                // Create wave pattern
+                const distance = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
+                vertex.y = Math.sin(distance * 1.5 - time * 2) * 0.3;
+                
+                positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+            }
+            
+            positionAttribute.needsUpdate = true;
+            oceanMesh.geometry.computeVertexNormals();
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Initialize particle network
+        function initParticleNetwork() {
+            const container = document.getElementById('particleNetwork');
+            const particles = [];
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'absolute rounded-full';
+                particle.style.width = Math.random() * 5 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = `rgba(${Math.random() * 100 + 155}, ${Math.random() * 100 + 155}, 255, ${Math.random() * 0.5 + 0.3})`;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                container.appendChild(particle);
+                particles.push({
+                    element: particle,
+                    x: Math.random() * 100,
+                    y: Math.random() * 100,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5
+                });
+            }
+            
+            // Animate particles
+            function animateParticles() {
+                particles.forEach(particle => {
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    
+                    // Wrap around edges
+                    if (particle.x > 100) particle.x = 0;
+                    if (particle.x < 0) particle.x = 100;
+                    if (particle.y > 100) particle.y = 0;
+                    if (particle.y < 0) particle.y = 100;
+                    
+                    particle.element.style.left = particle.x + '%';
+                    particle.element.style.top = particle.y + '%';
+                });
+                
+                requestAnimationFrame(animateParticles);
+            }
+            
+            animateParticles();
+        }
+        
+        // Typing effect for poem
+        const poemText = document.getElementById('poemText');
+        const originalPoem = "You are the ocean behind me — calm yet powerful, endless in strength. When I doubted myself, you believed. When I faltered, you stood unshaken. Because of you, my path found light, and my courage learned to breathe.";
+        let index = 0;
+        
+        function typePoem() {
+            if (index < originalPoem.length) {
+                poemText.textContent += originalPoem.charAt(index);
+                index++;
+                setTimeout(typePoem, 40);
+            }
+        }
+        
+        // Interactive cake
+        const interactiveCake = document.getElementById('interactiveCake');
+        const cakeFlame = document.getElementById('cakeFlame');
+        
+        interactiveCake.addEventListener('click', () => {
+            if (cakeFlame.style.visibility === 'hidden') {
+                cakeFlame.style.visibility = 'visible';
+                playCelebration();
+            } else {
+                cakeFlame.style.visibility = 'hidden';
+            }
+        });
+        
+        // Enhanced Fireworks with sparks
+        function startFireworks() {
+            const fireworks = document.getElementById('fireworks');
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    // Main firework dot
+                    const firework = document.createElement('div');
+                    firework.classList.add('firework');
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * (80) + '%';
+                    firework.style.backgroundColor = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'][Math.floor(Math.random() * 6)];
+                    fireworks.appendChild(firework);
+
+                    // Add sparks to each firework
+                    for (let j = 0; j < 5; j++) {
+                        const spark = document.createElement('div');
+                        spark.classList.add('spark');
+                        spark.style.left = firework.style.left;
+                        spark.style.top = firework.style.top;
+                        spark.style.backgroundColor = firework.style.backgroundColor;
+                        spark.style.transform = `rotate(${j * 72}deg)`;
+                        fireworks.appendChild(spark);
+                    }
+
+                    // Clean up after animation
+                    firework.addEventListener('animationend', () => {
+                        firework.remove();
+                        [...fireworks.querySelectorAll('.spark')].forEach(s => s.remove());
+                    });
+                }, i * 100);
+            }
+        }
+        
+        // Celebration sound
+        function playCelebration() {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const gainNode = context.createGain();
+            gainNode.connect(context.destination);
+            gainNode.gain.setValueAtTime(0.3, context.currentTime);
+            
+            // Play birthday melody
+            const notes = [523.25, 523.25, 587.33, 523.25, 698.46, 659.25, 523.25, 523.25, 587.33, 523.25, 783.99, 698.46];
+            
+            notes.forEach((freq, i) => {
+                const osc = context.createOscillator();
+                osc.frequency.value = freq;
+                osc.connect(gainNode);
+                osc.start(context.currentTime + i * 0.2);
+                osc.stop(context.currentTime + i * 0.2 + 0.19);
+            });
+        }
+        
+        // Wish button functionality
+        document.getElementById('wishBtn').addEventListener('click', function() {
+            startFireworks();
+            playCelebration();
+            this.style.display = 'none';
+            
+            // Create fullscreen immersive experience
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+            
+            // Enhance ocean animation
+            gsap.to(camera.position, {
+                z: 2,
+                duration: 3,
+                ease: "power2.inOut"
+            });
+            
+            // Add more particles
+            initParticleNetwork();
+        });
+        
+        // Initialize everything when page loads
+        window.addEventListener('load', () => {
+            initThreeJS();
+            initParticleNetwork();
+            typePoem();
+        });
+    </script>
+</body>
+</html>
